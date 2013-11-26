@@ -7,8 +7,14 @@
 			init: false, //set to true to begin process
 			pre: 'jQuery_Book-', //id/class prefix for conflict mitigation
 			title: stuff.title || 'Title',
+			//optimized for $('body').isABook();, but you can style sidebar if you please
+			fontSize: stuff.fontSize || '1.7em',
+			position: stuff.position || 'fixed',
+			color: stuff.color || '#428bca',
+			height: stuff.height || '100%',
+			width: stuff.width || '60px',
 			description: stuff.description || 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Porro, rerum, culpa laudantium tempore blanditiis voluptate quam quidem aliquam aliquid repellendus sunt eveniet odio! Beatae, error tempora in dolore optio temporibus.',
-			by: ', by ' + stuff.by || '',
+			by: (stuff.by) ? ', by ' + stuff.by : '',
 			//merge with defaults (contains chapters, subtitles, content)
 			content: stuff.content || {},
 			//what are we currently looking at?
@@ -30,14 +36,14 @@
 					var i = 0;
 					for (var prop in model.content) {
 						//show chapter number but store name as data ("i" to identify it)
-						nav += '<li><a href="#' + pre + 'chapter-' + prop + '"><button data-container="body"data-toggle="tooltip"title="' + prop + '"class="btn btn-default ' +
+						nav += '<li><a href="#' + pre + 'chapter-' + prop + '"><button data-container="body"data-toggle="tooltip"title="' + prop.replace(/_/g, ' ') + '"class="btn btn-default ' +
 							pre + 'list-button">' + (++i) + '</button></a></li>';
 						chapter = model.content[prop];
 						//if we have subtitles, stick em in
 						if (typeof chapter === 'object') {
 							nav += '<ul id="' + pre + 'sub-list">';
 							for (var sub in chapter) {
-								nav += '<li>' + sub + '</li>';
+								nav += '<li>' + sub.replace(/_/g, ' ') + '</li>';
 							}
 							nav += '</ul>';
 						}
@@ -50,13 +56,13 @@
 					var chapter;
 					for (var prop in model.content) {
 						//show chapter number but store name as data ("i" to identify it)
-						list += '<li><a href="#' + pre + 'chapter-' + prop + '">' + prop + '</a></li>';
+						list += '<li><a href="#' + pre + 'chapter-' + prop + '">' + prop.replace(/_/g, ' ') + '</a></li>';
 						chapter = model.content[prop];
 						//if we have subtitles, stick em in
 						if (typeof chapter === 'object') {
 							list += '<ul style="list-style-type:upper-roman;">';
 							for (var sub in chapter) {
-								list += '<li><a href="#' + pre + 'subtitle-' + sub + '">' + sub + '</a></li>';
+								list += '<li><a href="#' + pre + 'subtitle-' + sub + '">' + sub.replace(/_/g, ' ') + '</a></li>';
 							}
 							list += '</ul>';
 						}
@@ -71,11 +77,11 @@
 					for (var prop in model.content) {
 						chapter = model.content[prop];
 						//chapter
-						book += '<span id="' + pre + 'chapter-' + prop + '"class="' + pre + 'chapter">' + prop + '</span><br />';
+						book += '<span id="' + pre + 'chapter-' + prop + '"class="' + pre + 'chapter">' + prop.replace(/_/g, ' ') + '</span><br />';
 						if (typeof chapter === 'object') {
 							for (var sub in chapter) {
 								//subtitle
-								book += '<span id="' + pre + 'subtitle-' + sub + '"class="' + pre + 'subtitle">' + sub + '</span><br />';
+								book += '<span id="' + pre + 'subtitle-' + sub + '"class="' + pre + 'subtitle">' + sub.replace(/_/g, ' ') + '</span><br />';
 								//text
 								book += '<p class="' + pre + 'text-0">' + chapter[sub] + '</p><br />'; //indent twice for subtitle
 							}
@@ -122,7 +128,7 @@
 					if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
 						var target = $(this.hash);
 						var arr = this.hash.split('-');
-						if (arr[1] !== 'title') Router.goTo(arr[1] + '/' + arr[2]);
+						if (arr[1] !== 'title') Router.goTo(arr[1] + '/' + arr[2].replace(/_/g, ' '));
 						else Router.goTo('home');
 						target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
 						if (target.length) {
@@ -138,19 +144,6 @@
 				$(document).on('click', pre + 'home', function() {
 					Router.goTo('home');
 				});
-				//classes
-				var pre = '.' + model.pre;
-				$(pre + 'list-button').tooltip({
-					placement: 'right'
-				});
-				$(pre + 'arrow').tooltip();
-				$(pre + 'arrow').hover(function() {
-					$(this).stop();
-					$(this).fadeTo('normal', 1);
-				}, function() {
-					$(this).stop();
-					$(this).fadeTo('normal', 0.7);
-				});
 				$(document).on('click', pre + 'list-button', function() {
 					if ($(this).attr('id') !== model.pre + 'home') {
 						Router.goTo($(this).data('name'));
@@ -159,14 +152,16 @@
 			});
 		});
 		Router.create(function(hash, count) {
-			//parse url to scroll to
-			var target = $('#' + model.pre + hash.split('/').join('-'));
-			target = target.length ? target : $('[name=' + this.hash().slice(1) + ']');
-			if (target.length) {
-				$('html,body').animate({
-					scrollTop: target.offset().top
-				}, 1000);
-				return false;
+			//scroll to url position on first load
+			if (hash !== 'home' && count === 0) {
+				var target = $('#' + model.pre + hash.split('/').join('-').replace(/ /g, '_'));
+				target = target.length ? target : $('[name=' + this.hash().slice(1) + ']');
+				if (target.length) {
+					$('html,body').animate({
+						scrollTop: target.offset().top
+					}, 1000);
+					return false;
+				}
 			}
 		});
 		Model.modify('init', true); //lets get it on :)
@@ -175,17 +170,17 @@
 			//style container
 			el.css({
 				"text-rendering": 'optimizeLegibility',
-				"font-size": '1.7em'
+				"font-size": model.fontSize
 			});
 			//id's
 			var pre = '#' + model.pre;
 			//left side bar
 			$(pre + 'sidebar').css({
-				"background": '#428bca',
-				"position": 'fixed',
-				"height": '100%',
+				"background": model.color,
+				"position": model.position,
+				"height": model.height,
 				"overflow-y": 'auto',
-				"width": '60px'
+				"width": model.width
 			});
 			//left side bar ul's
 			$(pre + 'list, ' + pre + 'sub-list').css({
@@ -266,6 +261,9 @@
 			});
 			$(pre + 'text-1').css({
 				"margin-left": '25px'
+			});
+			$('.' + model.pre + 'list-button').tooltip({
+				placement: 'right'
 			});
 		}
 	};
