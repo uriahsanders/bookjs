@@ -152,17 +152,7 @@
 			});
 		});
 		Router.create(function(hash, count) {
-			//scroll to url position on first load
-			if (hash !== 'home' && count === 0) {
-				var target = $('#' + model.pre + hash.split('/').join('-').replace(/ /g, '_'));
-				target = target.length ? target : $('[name=' + this.hash().slice(1) + ']');
-				if (target.length) {
-					$('html,body').animate({
-						scrollTop: target.offset().top
-					}, 1000);
-					return false;
-				}
-			}
+			$('a[href="#'+ model.pre + hash.split('/').join('-').replace(/ /g, '_')+'"]').click();
 		});
 		Model.modify('init', true); //lets get it on :)
 		//style all page elements
