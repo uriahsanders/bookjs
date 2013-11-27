@@ -25,7 +25,7 @@
 			$(this).before(model.subBlock(id[0], id[1]));
 			$(this).attr('id', id[0] + '-' + (parseInt(id[1]) + 1) + '-subtitle');
 		});
-		$(document).on('click', '#create', function() {
+		$(document).on('click', '#view', function() {
 			model.json.title = $('#title').val();
 			model.json.by = $('#by').val();
 			model.json.description = $('#description').val();
@@ -49,11 +49,8 @@
 					else model.json.content[chapt] = $('#sub_'+(t)+ '-' + j + '-text').val();
 				}
 			}
-			alert("$('body').isABook(" + JSON.stringify(model.json) + ');');
-		});
-		$(document).on('click', '#view', function() {
 			$('body').isABook(model.json);
-			console.log(JSON.stringify(model.json))
+			console.log("$('body').isABook(" + JSON.stringify(model.json) + ');');
 		});
 	});
 })();
