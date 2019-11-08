@@ -11,6 +11,7 @@
 			fontSize: stuff.fontSize || '1.7em',
 			position: stuff.position || 'fixed',
 			color: stuff.color || '#428bca',
+			before: stuff.before || '',
 			height: stuff.height || '100%',
 			width: stuff.width || '60px',
 			description: stuff.description || 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Porro, rerum, culpa laudantium tempore blanditiis voluptate quam quidem aliquam aliquid repellendus sunt eveniet odio! Beatae, error tempora in dolore optio temporibus.',
@@ -39,14 +40,6 @@
 						nav += '<li><a href="#' + pre + 'chapter-' + prop + '"><button data-container="body"data-toggle="tooltip"title="' + prop.replace(/_/g, ' ') + '"class="btn btn-default ' +
 							pre + 'list-button">' + (++i) + '</button></a></li>';
 						chapter = model.content[prop];
-						//if we have subtitles, stick em in
-						if (typeof chapter === 'object') {
-							nav += '<ul id="' + pre + 'sub-list">';
-							for (var sub in chapter) {
-								nav += '<li>' + sub.replace(/_/g, ' ') + '</li>';
-							}
-							nav += '</ul>';
-						}
 					}
 					return nav + '</ul>';
 				})();
@@ -99,6 +92,7 @@
 					'<div id="' + pre + 'nav">' + nav + '</div>',
 					'</div>',
 					'<div id="' + pre + 'main">',
+					model.before,
 					'<div id="' + pre + 'home-page">',
 					'<span id="' + pre + 'title"class="h1">' + model.title + model.by + '</span><br>',
 					'<div id="' + pre + 'writing">',
@@ -133,7 +127,7 @@
 						target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
 						if (target.length) {
 							$('html,body').animate({
-								scrollTop: target.offset().top
+								scrollTop: target.offset().top -50
 							}, 1000);
 							return false;
 						}
@@ -152,7 +146,7 @@
 			});
 		});
 		Router.create(function(hash, count) {
-			$('a[href="#'+ model.pre + hash.split('/').join('-').replace(/ /g, '_')+'"]').click();
+			if(count === 0 && hash !== 'home') $('a[href="#'+ model.pre + hash.split('/').join('-').replace(/ /g, '_')+'"]').click();
 		});
 		Model.modify('init', true); //lets get it on :)
 		//style all page elements
@@ -170,7 +164,8 @@
 				"position": model.position,
 				"height": model.height,
 				"overflow-y": 'auto',
-				"width": model.width
+				"width": model.width,
+				"z-index": 2
 			});
 			//left side bar ul's
 			$(pre + 'list, ' + pre + 'sub-list').css({
